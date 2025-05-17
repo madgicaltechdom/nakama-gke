@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cockroachdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cockroachdb
+  template:
+    metadata:
+      labels:
+        app: cockroachdb
+    spec:
+      containers:
+        - name: cockroachdb
+          image: cockroachdb/cockroach:latest-v23.1
+          command:
+            - "/cockroach/cockroach"
+            - "start-single-node"
+            - "--insecure"
+            - "--store=attrs=ssd,path=/var/lib/cockroach/"
+          ports:
+            - containerPort: 26257
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /var/lib/cockroach
+              name: cockroachdb-storage
+      volumes:
+        - name: cockroachdb-storage
+          persistentVolumeClaim:
+            claimName: cockroachdb-pvc

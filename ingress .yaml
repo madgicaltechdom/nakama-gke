@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nakama-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: nakama-ip-new
+    networking.gke.io/managed-certificates: nakama-cert
+    beta.cloud.google.com/backend-config: '{"default": "nakama-backendconfig"}'
+
+spec:
+  rules:
+    - host: YOUR_DOMAIN
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nakama
+                port:
+                  number: 7350 # work post and websocket

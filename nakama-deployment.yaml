@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nakamadeploy
+  annotations:
+    beta.cloud.google.com/backend-config: '{"default": "nakama-backendconfig"}'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nakama
+  template:
+    metadata:
+      labels:
+        app: nakama
+    spec:
+      containers:
+        - name: nakama
+          image: registry.heroiclabs.com/heroiclabs/nakama:3.22.0
+          command:
+            - "/bin/sh"
+            - "-ecx"
+            - |
+              /nakama/nakama migrate up --database.address root@cockroachdb:26257 &&
+              exec /nakama/nakama \
+              --name nakama1 \
+              --database.address root@cockroachdb:26257 \
+              --logger.level DEBUG \
+              --session.token_expiry_sec 7200 \
+              --metrics.prometheus_port 9100 \
+              --socket.read_timeout_ms 60000 \
+              --socket.idle_timeout_ms 120000
+          ports:
+            - containerPort: 7349
+            - containerPort: 7350
+            - containerPort: 7351
+            - containerPort: 9100
